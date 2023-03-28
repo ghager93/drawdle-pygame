@@ -12,18 +12,26 @@ class CanvasState(State):
 
     def __init__(self) -> None:
         super().__init__()
+
+        self._screen = pg.display.get_surface()
+
         self._brush_width = 3
         self._brush_colour = "black"
+
+        self._is_drawing = False
+
+        _canvas_size = 2/3 * self._screen.get_width(), self._screen.get_height() - 100
+        self._canvas_rect = pg.Rect((50, 50), _canvas_size)
+
         self._lines = []
         self._current_line = []
-        self._is_drawing = False
 
 
     def handle_event(self, event: pg.event.Event) -> None:
         pass
 
     def draw(self, screen: pg.Surface) -> None:
-        screen.fill("white")
+        pg.draw.rect(screen, "white", self._canvas_rect)
 
         for line in self._lines:
             for i in range(len(line)-1):

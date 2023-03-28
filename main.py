@@ -40,8 +40,8 @@ while is_running:
     current_state.update(dt)
 
     # Draw
-    current_state.draw(screen)
     global_state.draw(screen)
+    current_state.draw(screen)
 
     pg.display.update()
 

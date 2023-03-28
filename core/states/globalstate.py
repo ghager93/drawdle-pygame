@@ -20,6 +20,7 @@ class GlobalState(State):
             self.fps_draw = str(int(clock.get_clock().get_fps()))
 
     def draw(self, screen: pg.Surface) -> None:
+        screen.fill("gray")
         screen.blit(self.font.render(self.fps_draw, True, "Black"), (0, 0))
 
     def update(self, dt: int) -> None:
