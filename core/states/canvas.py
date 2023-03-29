@@ -1,7 +1,8 @@
 import pygame as pg
 
-from core.states.state import State
 from core import utils
+from core.states.state import State
+from core.logic import linefuncs
 
 
 class CanvasState(State):
@@ -23,8 +24,12 @@ class CanvasState(State):
         _canvas_size = 2/3 * self._screen.get_width(), self._screen.get_height() - 100
         self._canvas_rect = pg.Rect((50, 50), _canvas_size)
 
+        _mini_canvas_size = 1/4 * pg.Vector2(_canvas_size)
+        self._mini_canvas_rect = pg.Rect((1000, 50), _mini_canvas_size)
+
         self._lines = []
         self._current_line = []
+        self._normalised_lines = []
 
         self._font = pg.font.Font(size=32)
 
@@ -44,6 +49,8 @@ class CanvasState(State):
         # Draw current line
         for i in range(len(self._current_line)-1):
             pg.draw.line(screen, self._brush_colour, self._current_line[i], self._current_line[i+1], self._brush_width)
+
+        pg.draw.rect(screen, "white", self._mini_canvas_rect)
 
         screen.blit(self._font.render(str(self._is_mouse_on_canvas), True, "black"), (50, 0))
 
@@ -66,6 +73,8 @@ class CanvasState(State):
 
         if self._is_drawing:
             self._current_line.append(mouse_pos)
+
+        self._normalised_lines = linefuncs.normalise_lines(self._lines, self._canvas_rect)
 
 
     def _is_line_start(self):
