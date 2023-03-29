@@ -30,6 +30,7 @@ class CanvasState(State):
         self._lines = []
         self._current_line = []
         self._normalised_lines = []
+        self._mini_lines = []
 
         self._font = pg.font.Font(size=32)
 
@@ -51,6 +52,10 @@ class CanvasState(State):
             pg.draw.line(screen, self._brush_colour, self._current_line[i], self._current_line[i+1], self._brush_width)
 
         pg.draw.rect(screen, "white", self._mini_canvas_rect)
+
+        for line in self._mini_lines:
+            for i in range(len(line)-1):
+                pg.draw.line(screen, self._brush_colour, line[i], line[i+1], self._brush_width)
 
         screen.blit(self._font.render(str(self._is_mouse_on_canvas), True, "black"), (50, 0))
 
@@ -75,6 +80,7 @@ class CanvasState(State):
             self._current_line.append(mouse_pos)
 
         self._normalised_lines = linefuncs.normalise_lines(self._lines, self._canvas_rect)
+        self._mini_lines = linefuncs.scale_lines(self._normalised_lines, self._mini_canvas_rect)
 
 
     def _is_line_start(self):
