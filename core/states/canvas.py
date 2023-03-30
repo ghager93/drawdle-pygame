@@ -73,7 +73,7 @@ class CanvasState(State):
             )
 
         if self._drawing_bound_rect:
-            pg.draw.rect(screen, "red", self._drawing_bound_rect, width=1)
+            pg.draw.rect(screen, "red", self._square_bound_rect, width=1)
 
         pg.draw.rect(screen, "white", self._mini_canvas_rect)
 
@@ -118,7 +118,7 @@ class CanvasState(State):
                 linefuncs.decimate_line(self._current_line, self._epsilon)
             )
             self._normalised_lines = [
-                linefuncs.normalise_line(line, self._drawing_bound_rect)
+                linefuncs.normalise_line(line, self._square_bound_rect)
                 for line in self._decimated_lines
             ]
             self._mini_lines = [
@@ -170,6 +170,11 @@ class CanvasState(State):
         self._drawing_bound_rect.w = updated_bound[1] - updated_bound[0]
         self._drawing_bound_rect.y = updated_bound[2]
         self._drawing_bound_rect.h = updated_bound[3] - updated_bound[2]
+
+    @property
+    def _square_bound_rect(self):
+        width = max(self._drawing_bound_rect.w, self._drawing_bound_rect.h)
+        return pg.Rect((self._drawing_bound_rect.x, self._drawing_bound_rect.y), (width, width))
 
     def teardown(self) -> None:
         pass
