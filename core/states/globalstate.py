@@ -8,6 +8,7 @@ class GlobalState(State):
     """
     Holds global variables, handles global events and draws global objects.
     """
+
     name = "global"
 
     def __init__(self) -> None:

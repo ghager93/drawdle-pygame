@@ -9,6 +9,7 @@ class CanvasState(State):
     """
     State holding drawing canvas.
     """
+
     name = "canvas"
 
     def __init__(self) -> None:
@@ -29,6 +30,7 @@ class CanvasState(State):
 
         self._lines = []
         self._current_line = []
+        self._decimated_lines = []
         self._normalised_lines = []
         self._mini_lines = []
 
@@ -39,7 +41,6 @@ class CanvasState(State):
         self._is_mouse_on_canvas = False
 
         self._drawing_bound_rect = None
-
 
     def handle_event(self, event: pg.event.Event) -> None:
         if event.type == pg.KEYDOWN:
@@ -56,12 +57,20 @@ class CanvasState(State):
         pg.draw.rect(screen, "white", self._canvas_rect)
 
         for line in self._lines:
-            for i in range(len(line)-1):
-                pg.draw.line(screen, self._brush_colour, line[i], line[i+1], self._brush_width)
+            for i in range(len(line) - 1):
+                pg.draw.line(
+                    screen, self._brush_colour, line[i], line[i + 1], self._brush_width
+                )
 
         # Draw current line
-        for i in range(len(self._current_line)-1):
-            pg.draw.line(screen, self._brush_colour, self._current_line[i], self._current_line[i+1], self._brush_width)
+        for i in range(len(self._current_line) - 1):
+            pg.draw.line(
+                screen,
+                self._brush_colour,
+                self._current_line[i],
+                self._current_line[i + 1],
+                self._brush_width,
+            )
 
         if self._drawing_bound_rect:
             pg.draw.rect(screen, "red", self._drawing_bound_rect, width=1)
@@ -69,10 +78,14 @@ class CanvasState(State):
         pg.draw.rect(screen, "white", self._mini_canvas_rect)
 
         for line in self._mini_lines:
-            for i in range(len(line)-1):
-                pg.draw.line(screen, self._brush_colour, line[i], line[i+1], self._brush_width)
+            for i in range(len(line) - 1):
+                pg.draw.line(
+                    screen, self._brush_colour, line[i], line[i + 1], self._brush_width
+                )
 
-        screen.blit(self._font.render(str(self._is_mouse_on_canvas), True, "black"), (50, 0))
+        screen.blit(
+            self._font.render(str(self._is_mouse_on_canvas), True, "black"), (50, 0)
+        )
 
     def update(self, dt: int) -> None:
         mouse_pos = pg.mouse.get_pos()
@@ -94,27 +107,56 @@ class CanvasState(State):
             if self._drawing_bound_rect:
                 self._update_drawing_bound_rect(line_bound)
             else:
-                self._drawing_bound_rect = pg.Rect(line_bound[0], line_bound[2], line_bound[1]-line_bound[0], line_bound[3]-line_bound[2])
+                self._drawing_bound_rect = pg.Rect(
+                    line_bound[0],
+                    line_bound[2],
+                    line_bound[1] - line_bound[0],
+                    line_bound[3] - line_bound[2],
+                )
 
-            self._normalised_lines.append(linefuncs.normalise_line(self._current_line, self._canvas_rect))
-            self._mini_lines.append(linefuncs.decimate_line(linefuncs.scale_line(self._normalised_lines[-1], self._mini_canvas_rect), self._epsilon))
+            self._decimated_lines.append(
+                linefuncs.decimate_line(self._current_line, self._epsilon)
+            )
+            self._normalised_lines = [
+                linefuncs.normalise_line(line, self._drawing_bound_rect)
+                for line in self._decimated_lines
+            ]
+            self._mini_lines = [
+                linefuncs.scale_line(line, self._mini_canvas_rect)
+                for line in self._normalised_lines
+            ]
             self._current_line = list()
 
         if self._is_drawing:
             self._current_line.append(mouse_pos)
 
     def _is_line_start(self):
-        return self._is_mouse_on_canvas and pg.mouse.get_pressed()[0] and not self._is_drawing
-    
+        return (
+            self._is_mouse_on_canvas
+            and pg.mouse.get_pressed()[0]
+            and not self._is_drawing
+        )
+
     def _is_line_end(self):
-        return (not pg.mouse.get_pressed()[0] or not self._is_mouse_on_canvas) and self._is_drawing
-    
+        return (
+            not pg.mouse.get_pressed()[0] or not self._is_mouse_on_canvas
+        ) and self._is_drawing
+
     def _recalculate_mini_lines(self):
-        self._mini_lines = [linefuncs.decimate_line(linefuncs.scale_line(line, self._mini_canvas_rect), self._epsilon) for line in self._normalised_lines]
+        self._mini_lines = [
+            linefuncs.decimate_line(
+                linefuncs.scale_line(line, self._mini_canvas_rect), self._epsilon
+            )
+            for line in self._normalised_lines
+        ]
 
     def _update_drawing_bound_rect(self, new_bound):
-        rect = self._drawing_bound_rect
-        updated_bound = [rect.x, rect.w+rect.x, rect.y, rect.h+rect.y]
+        updated_bound = [
+            self._drawing_bound_rect.x,
+            self._drawing_bound_rect.w + self._drawing_bound_rect.x,
+            self._drawing_bound_rect.y,
+            self._drawing_bound_rect.h + self._drawing_bound_rect.y,
+        ]
         if new_bound[0] < updated_bound[0]:
             updated_bound[0] = new_bound[0]
         if new_bound[1] > updated_bound[1]:

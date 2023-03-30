@@ -4,19 +4,24 @@ import pygame as pg
 
 
 def is_border_pos(pos: Tuple[int, int]) -> bool:
-    return pos[0] == 0 or pos[1] == 0 or pos[0] == screen.get_width() - 1 or pos[1] == screen.get_height() - 1
+    return (
+        pos[0] == 0
+        or pos[1] == 0
+        or pos[0] == screen.get_width() - 1
+        or pos[1] == screen.get_height() - 1
+    )
 
 
 def draw() -> None:
     screen.fill("white")
 
     for line in line_list:
-        for i in range(len(line)-1):
-            pg.draw.line(screen, "black", line[i], line[i+1], 3)
+        for i in range(len(line) - 1):
+            pg.draw.line(screen, "black", line[i], line[i + 1], 3)
 
     # Draw current line
-    for i in range(len(current_line)-1):
-        pg.draw.line(screen, "black", current_line[i], current_line[i+1], 3)
+    for i in range(len(current_line) - 1):
+        pg.draw.line(screen, "black", current_line[i], current_line[i + 1], 3)
 
     screen.blit(font.render(fps_draw, True, "Black"), (0, 0))
 
@@ -50,7 +55,9 @@ while running:
         is_drawing = True
 
     # End of line
-    if (not pg.mouse.get_pressed()[0] or is_border_pos(pg.mouse.get_pos())) and is_drawing:
+    if (
+        not pg.mouse.get_pressed()[0] or is_border_pos(pg.mouse.get_pos())
+    ) and is_drawing:
         # If on border, add current mouse position as last point on line
         if is_border_pos(pg.mouse.get_pos()):
             current_line.append(pg.mouse.get_pos())
@@ -68,4 +75,3 @@ while running:
     pg.display.update()
 
 pg.quit()
-

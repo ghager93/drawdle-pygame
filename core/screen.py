@@ -1,4 +1,4 @@
-import pygame as pg 
+import pygame as pg
 
 
 screen = pg.display.set_mode((1280, 720))

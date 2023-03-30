@@ -34,7 +34,7 @@ while is_running:
         global_state.handle_event(event)
         current_state.handle_event(event)
 
-    # Update 
+    # Update
     global_state.update(dt)
     current_state.update(dt)
 
@@ -44,6 +44,6 @@ while is_running:
 
     pg.display.update()
 
-    dt = clock.tick(fps)    
+    dt = clock.tick(fps)
 
 pg.quit()
