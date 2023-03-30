@@ -75,3 +75,9 @@ def calculate_line_bounds(
     y_max = max([p[1] for p in line])
 
     return x_min, x_max, y_min, y_max
+
+
+def round_line_to_int(
+    line: List[Tuple[float, float]]
+) -> List[Tuple[int, int]]:
+    return [(int(x), int(y)) for x, y in line]

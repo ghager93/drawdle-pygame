@@ -1,9 +1,11 @@
 import pygame as pg
 
+from datetime import datetime
+
 from core import utils
 from core.states.state import State
 from core.logic import linefuncs
-
+from core.logic import export
 
 class CanvasState(State):
     """
@@ -25,8 +27,8 @@ class CanvasState(State):
         _canvas_size = self._screen.get_height() - 100, self._screen.get_height() - 100
         self._canvas_rect = pg.Rect((50, 50), _canvas_size)
 
-        _mini_canvas_size = 256, 256
-        self._mini_canvas_rect = pg.Rect((1000, 50), _mini_canvas_size)
+        self._mini_canvas_size = 256, 256
+        self._mini_canvas_rect = pg.Rect((1000, 50), self._mini_canvas_size)
 
         self._lines = []
         self._current_line = []
@@ -36,11 +38,13 @@ class CanvasState(State):
 
         self._epsilon = 2
 
-        self._font = pg.font.Font(size=32)
+        self._font = pg.font.Font(None, size=32)
 
         self._is_mouse_on_canvas = False
 
         self._drawing_bound_rect = None
+
+        self._export_rect = pg.Rect((0, 0), self._mini_canvas_size)
 
     def handle_event(self, event: pg.event.Event) -> None:
         if event.type == pg.KEYDOWN:
@@ -52,6 +56,11 @@ class CanvasState(State):
                 self._epsilon += 1
                 print("epsilon:", self._epsilon)
                 self._recalculate_mini_lines()
+            elif event.key == pg.K_s:
+                export_lines = [linefuncs.round_line_to_int(linefuncs.scale_line(line, self._export_rect)) for line in self._normalised_lines]
+                filename = datetime.now().strftime("%Y%m%d-%H%M%S") + ".bmp"
+                export.to_bmp(filename, self._mini_canvas_size, export_lines)
+                print("Image saved as", filename)
 
     def draw(self, screen: pg.Surface) -> None:
         pg.draw.rect(screen, "white", self._canvas_rect)
@@ -124,6 +133,10 @@ class CanvasState(State):
             self._mini_lines = [
                 linefuncs.scale_line(line, self._mini_canvas_rect)
                 for line in self._normalised_lines
+            ]
+            self._mini_lines = [
+                linefuncs.round_line_to_int(line)
+                for line in self._mini_lines
             ]
             self._current_line = list()
 
