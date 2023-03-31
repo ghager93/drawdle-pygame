@@ -59,8 +59,11 @@ class CanvasState(State):
             elif event.key == pg.K_s:
                 export_lines = [linefuncs.round_line_to_int(linefuncs.scale_line(line, self._export_rect)) for line in self._normalised_lines]
                 filename = datetime.now().strftime("%Y%m%d-%H%M%S") + ".bmp"
-                export.to_bmp(filename, self._mini_canvas_size, export_lines)
-                print("Image saved as", filename)
+                export.to_bmp(filename, export_lines, self._mini_canvas_size)
+            elif event.key == pg.K_j:
+                export_lines = [linefuncs.round_line_to_int(linefuncs.scale_line(line, self._export_rect)) for line in self._normalised_lines]
+                filename = datetime.now().strftime("%Y%m%d-%H%M%S") + ".json"
+                export.to_json(filename, export_lines)
 
     def draw(self, screen: pg.Surface) -> None:
         pg.draw.rect(screen, "white", self._canvas_rect)
