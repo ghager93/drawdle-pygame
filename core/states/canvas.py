@@ -6,6 +6,7 @@ from core import utils
 from core.states.state import State
 from core.logic import linefuncs
 from core.logic import export
+from core.logic import pred_model
 
 class CanvasState(State):
     """
@@ -27,7 +28,7 @@ class CanvasState(State):
         _canvas_size = self._screen.get_height() - 100, self._screen.get_height() - 100
         self._canvas_rect = pg.Rect((50, 50), _canvas_size)
 
-        self._mini_canvas_size = 256, 256
+        self._mini_canvas_size = 27, 27
         self._mini_canvas_rect = pg.Rect((1000, 50), self._mini_canvas_size)
 
         self._lines = []
@@ -64,6 +65,14 @@ class CanvasState(State):
                 export_lines = [linefuncs.round_line_to_int(linefuncs.scale_line(line, self._export_rect)) for line in self._normalised_lines]
                 filename = datetime.now().strftime("%Y%m%d-%H%M%S") + ".json"
                 export.to_json(filename, export_lines)
+            elif event.key == pg.K_k:
+                export_lines = [linefuncs.round_line_to_int(linefuncs.scale_line(line, self._export_rect)) for line in self._normalised_lines]
+                filename = datetime.now().strftime("%Y%m%d-%H%M%S") + "-qd" + ".json"
+                export.to_json(filename, export.as_quickdraw(export_lines))  
+            elif event.key == pg.K_p:
+                export_lines = [linefuncs.round_line_to_int(linefuncs.scale_line(line, self._export_rect)) for line in self._normalised_lines]
+                matrix = export.as_numpy(export_lines, self._mini_canvas_size)
+                self._predict(matrix)
 
     def draw(self, screen: pg.Surface) -> None:
         pg.draw.rect(screen, "white", self._canvas_rect)
@@ -145,6 +154,10 @@ class CanvasState(State):
 
         if self._is_drawing:
             self._current_line.append(mouse_pos)
+
+    def _predict(self, matrix):
+        predictions = pred_model.predict(matrix)
+        print(predictions)
 
     def _is_line_start(self):
         return (
